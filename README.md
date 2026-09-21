@@ -7,7 +7,31 @@
 
 ---
 
-## 📌 Descripción General
+## Documentación Técnica y Académica Completa
+
+Para revisar la especificación formal del sistema bajo metodología RUP/UML y la cobertura de los puntos 3.1.1 a 3.1.8.3.2 del caso de estudio, consulte el documento maestro:
+
+- **[Documento de Especificación y Arquitectura Técnica (DOCUMENTACION_TECNICA.md)](DOCUMENTACION_TECNICA.md)**
+
+### Contenido de la Documentación:
+1. **3.1. MedIA360:** Introducción, Ámbito Empresarial, Objetivos Generales y Específicos.
+2. **3.1.4 a 3.1.7:** Alcance, Recursos Humanos/Tecnológicos, Presupuesto de Costos y Beneficios de Visión Artificial.
+3. **3.1.8:** Infraestructura de Red Hospitalaria (VLANs, Switches 24P, Direccionamiento IP Estático por Salas 1, 2, 3 y Área Administrativa).
+4. **3.1.8.1. Captura de Requisitos:**
+   - Actores del Sistema (Enfermero/a, Médico General, Radiólogo, Dermatólogo, Farmacéutico, Auditor).
+   - Catálogo de Casos de Uso CU-01 a CU-10.
+   - Plantillas Detalladas RUP para Casos de Uso Críticos (Triaje Manchester, Consulta SOAP, Radiología Grad-CAM, Dermatología ABCD y Bloqueo Farmacéutico).
+   - **Diagrama UML Estructurado de Casos de Uso** (con relaciones `<<include>>` y `<<extend>>`).
+5. **3.1.8.2. Análisis:**
+   - Identificación de Paquetes (Presentación, Lógica Clínica, Motores de IA, Modelos de Datos).
+   - **Diagrama UML de Vista de Paquetes**.
+6. **3.1.8.3. Diseño:**
+   - **Diagrama de Despliegue Físico y Lógico de la Arquitectura**.
+   - **5 Diagramas de Secuencia UML de la Lógica de Negocio** (Triaje, SOAP con IA, Grad-CAM, ABCD y Farmacia).
+
+---
+
+## Descripción General
 
 **MedIA 360** es un prototipo interactivo de alta fidelidad para una clínica digital moderna que integra modelos de Inteligencia Artificial asistencial en todo el flujo de atención médica ambulatoria y de urgencias.
 
@@ -15,7 +39,7 @@ El sistema está diseñado bajo el principio rector de **Human-in-the-loop**: la
 
 ---
 
-## 📸 Demostración Visual
+## Demostración Visual
 
 ### Panel de Control y Triaje Manchester (Modo Claro)
 ![MedIA 360 - Interfaz Clínica](docs/medicina_light.png)
@@ -30,7 +54,7 @@ Segmentación perimetral de lesiones cutáneas sobre macrofotografía dermatosc�
 
 ---
 
-## 🚀 5 Principales Funcionalidades Clínicas
+## 5 Principales Funcionalidades Clínicas
 
 1. **Triaje Inteligente Manchester (5 Niveles):**
    - Clasificación automatizada de urgencia: *Nivel 1 (Resucitación)* a *Nivel 5 (No Urgente)*.
@@ -54,7 +78,7 @@ Segmentación perimetral de lesiones cutáneas sobre macrofotografía dermatosc�
 
 ---
 
-## 🛠️ Tecnologías y Arquitectura
+## Tecnologías y Arquitectura
 
 - **Frontend:** Vanilla HTML5 semántico, CSS3 moderno (paleta *Deep Obsidian Medical* y *Crisp Surgical Light*, variables CSS reactivas, sin frameworks pesados).
 - **Iconografía:** [Lucide Icons](https://lucide.dev/) vectoriales (cero emojis para un estándar médico profesional).
@@ -64,7 +88,7 @@ Segmentación perimetral de lesiones cutáneas sobre macrofotografía dermatosc�
 
 ---
 
-## 💻 Instrucciones de Ejecución Local
+## Instrucciones de Ejecución Local
 
 1. Clona el repositorio:
    ```bash
@@ -84,7 +108,7 @@ Segmentación perimetral de lesiones cutáneas sobre macrofotografía dermatosc�
 
 ---
 
-## 🌐 Despliegue en GitHub Pages
+## Despliegue en GitHub Pages
 
 Para publicar este prototipo en la web gratuitamente:
 1. Ve a la pestaña **Settings** de este repositorio en GitHub.
