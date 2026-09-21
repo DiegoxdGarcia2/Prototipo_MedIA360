@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedIA 360 - Clínica Digital Inteligente con Asistentes por Especialidad</title>
+  <meta name="description" content="Plataforma clínica integral de soporte algorítmico hospitalario con supervisión médica humana.">
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Chart.js para visualizaciones -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons (Vector Icons Sin Emojis) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon-box">
+          <i data-lucide="cross"></i>
+        </div>
+        <div>
+          <div class="brand-title">MedIA 360</div>
+          <div class="brand-sub">Clinical AI Suite</div>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE ROL -->
+      <div class="role-switcher-box">
+        <div class="role-label-wrapper">
+          <span class="role-label">Perfil Operativo</span>
+          <span class="role-badge-indicator" id="currentRoleLabel">MEDICO</span>
+        </div>
+        <select id="roleSelector" class="role-select">
+          <option value="medico" selected>Médico General</option>
+          <option value="enfermeria">Enfermería (Triaje)</option>
+          <option value="especialista">Especialista Clínico</option>
+          <option value="farmacia">Farmacia & Laboratorio</option>
+          <option value="admin">Dirección & Auditoría</option>
+          <option value="paciente">Portal del Paciente</option>
+        </select>
+      </div>
+
+      <!-- MENÚ DE NAVEGACIÓN -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Flujo Asistencial</div>
+        
+        <a href="#triaje" class="nav-item active" data-view="triaje">
+          <i data-lucide="heart-pulse" class="nav-icon-svg"></i>
+          <span>Triaje & Admisión</span>
+          <span class="nav-badge-count urgent">4</span>
+        </a>
+
+        <a href="#consulta" class="nav-item" data-view="consulta">
+          <i data-lucide="mic" class="nav-icon-svg"></i>
+          <span>Consulta IA (SOAP)</span>
+        </a>
+
+        <a href="#especialidades" class="nav-item" data-view="especialidades">
+          <i data-lucide="brain-circuit" class="nav-icon-svg"></i>
+          <span>Especialidades IA</span>
+        </a>
+
+        <div class="nav-section-title">Servicios Clínicos</div>
+
+        <a href="#hce" class="nav-item" data-view="hce">
+          <i data-lucide="file-text" class="nav-icon-svg"></i>
+          <span>Historia Clínica (HCE)</span>
+        </a>
+
+        <a href="#farmacia_lab" class="nav-item" data-view="farmacia_lab">
+          <i data-lucide="pill" class="nav-icon-svg"></i>
+          <span>Farmacia & Laboratorio</span>
+        </a>
+
+        <a href="#auditoria" class="nav-item" data-view="auditoria">
+          <i data-lucide="shield-check" class="nav-icon-svg"></i>
+          <span>Auditoría & Métricas</span>
+        </a>
+      </nav>
+
+      <!-- FOOTER SIDEBAR -->
+      <div class="sidebar-footer">
+        <div>
+          <strong>UAGRM</strong> • Grupo 9<br>
+          <span style="color:var(--text-light); font-size:0.68rem;">Ingeniería de Software II</span>
+        </div>
+        <a href="https://github.com/DiegoxdGarcia2/Prototipo_MedIA360" target="_blank" class="btn btn-secondary btn-sm" title="Ver Repositorio en GitHub">
+          <i data-lucide="github" style="width:14px; height:14px;"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="app-main">
+      
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title">
+            <h1 id="pageTitleHeading">Centro de Mando Clínico MedIA 360</h1>
+            <p id="pageSubTitle">Asistencia algorítmica integral sujeta a validación profesional colegiada</p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="btnIniciarDemoTour" class="btn btn-primary btn-sm">
+            <i data-lucide="play" style="width:14px; height:14px;"></i>
+            <span>Demo Guiada</span>
+          </button>
+          <button id="btnToggleTheme" class="btn-icon" title="Cambiar Tema Visual">
+            <i data-lucide="sun" style="width:16px; height:16px;"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- BANNER PACIENTE ACTIVO -->
+      <div class="patient-context-bar">
+        <div class="patient-info-summary">
+          <span style="font-weight:600;">Expediente Activo: <strong id="contextPatientName" style="color:var(--primary);">Carlos Mendoza Vaca (54a - PAC-1001)</strong></span>
+          <span id="contextPatientBadge" class="triage-badge t2">Nivel 2: Muy Urgente</span>
+          <div id="contextPatientAllergies" style="display:inline-flex; gap:6px;">
+            <span class="allergy-alert-pill">
+              <i data-lucide="alert-triangle" style="width:12px; height:12px;"></i>
+              <span>Alergia: Penicilina</span>
+            </span>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-sm btn-context-action" onclick="window.medApp.navegarA('hce')">
+            <span>Ver HCE Completa</span>
+            <i data-lucide="arrow-right" style="width:13px; height:13px;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="content-wrapper">
+        
+        <!-- ============================================================
+             VISTA 1: TRIAJE Y ADMISIÓN
+             ============================================================ -->
+        <section id="view_triaje" class="view-panel active">
+          <div class="grid-60-40">
+            <!-- Cola de Espera -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i data-lucide="list-ordered" style="width:18px; height:18px; color:var(--primary);"></i>
+                  <span>Cola Activa de Triaje Manchester</span>
+                </div>
+                <span class="patient-pill">Prioridad Algorítmica</span>
+              </div>
+
+              <div style="overflow-x:auto;">
+                <table class="clinical-table">
+                  <thead>
+                    <tr>
+                      <th>Paciente</th>
+                      <th>Prioridad</th>
+                      <th>Signos Vitales</th>
+                      <th>Motivo / Alertas IA</th>
+                      <th>Especialidad</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="triajeQueueBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Calculadora en Tiempo Real -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="calculator" style="width:18px; height:18px; color:var(--secondary);"></i>
+                    <span>Evaluación de Triaje en Tiempo Real</span>
+                  </div>
+                </div>
+
+                <form id="formNuevoTriaje">
+                  <div class="form-group">
+                    <label class="form-label">Nombre del Paciente</label>
+                    <input type="text" id="inputNombrePaciente" class="form-control" placeholder="Ej: Mario Justiniano" required>
+                  </div>
+
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" class="form-group">
+                    <div>
+                      <label class="form-label">Edad</label>
+                      <input type="number" id="inputEdadPaciente" class="form-control" value="35" min="0" max="120">
+                    </div>
+                    <div>
+                      <label class="form-label">Género</label>
+                      <select id="selectGeneroPaciente" class="form-control">
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Motivo de Ingreso</label>
+                    <input type="text" id="inputMotivoTriaje" class="form-control" placeholder="Síntomas reportados en admisión">
+                  </div>
+
+                  <!-- Signos vitales -->
+                  <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;" class="form-group">
+                    <div>
+                      <label class="form-label">FC (lpm)</label>
+                      <input type="number" id="inputFC" class="form-control" value="82">
+                    </div>
+                    <div>
+                      <label class="form-label">PA Sist.</label>
+                      <input type="number" id="inputPAS" class="form-control" value="120">
+                    </div>
+                    <div>
+                      <label class="form-label">PA Diast.</label>
+                      <input type="number" id="inputPAD" class="form-control" value="80">
+                    </div>
+                    <div>
+                      <label class="form-label">FR (rpm)</label>
+                      <input type="number" id="inputFR" class="form-control" value="16">
+                    </div>
+                    <div>
+                      <label class="form-label">SpO2 (%)</label>
+                      <input type="number" id="inputSpO2" class="form-control" value="98">
+                    </div>
+                    <div>
+                      <label class="form-label">T° (°C)</label>
+                      <input type="number" step="0.1" id="inputTemp" class="form-control" value="36.7">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Escala Análoga de Dolor (EVA: <span id="displayDolorValor">4</span>/10)</label>
+                    <input type="range" id="inputDolor" min="0" max="10" value="4" style="width:100%; accent-color:var(--primary);" oninput="document.getElementById('displayDolorValor').textContent = this.value">
+                  </div>
+
+                  <div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="font-size:0.78rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                      <input type="checkbox" id="chkDolorToracico"> Dolor precordial opresivo con diaforesis
+                    </label>
+                    <label style="font-size:0.78rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                      <input type="checkbox" id="chkDificultadRespirar"> Disnea aguda o estridor respiratorio
+                    </label>
+                    <label style="font-size:0.78rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                      <input type="checkbox" id="chkSangrado"> Hemorragia activa o focalidad neurológica
+                    </label>
+                  </div>
+
+                  <!-- Cálculo Predictivo Manchester -->
+                  <div style="background:var(--bg-app); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:14px;">
+                    <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Predicción Protocolo Manchester</div>
+                    <div style="margin-top:6px;">
+                      <span id="triajeCalculadoBadge" class="triage-badge t4">Nivel 4: Menor Urgencia</span>
+                    </div>
+                    <div id="triajeCalculadoTexto" style="font-size:0.78rem; margin-top:6px; color:var(--text-main);">
+                      Tiempo máximo de espera: 60 minutos
+                    </div>
+                    <div id="triajeCalculadoAlertas"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Especialidad de Destino</label>
+                    <select id="selectEspecialidadTriaje" class="form-control">
+                      <option value="Medicina General">Medicina General</option>
+                      <option value="Cardiología">Cardiología</option>
+                      <option value="Dermatología">Dermatología</option>
+                      <option value="Radiología">Radiología / Imagenología</option>
+                      <option value="Pediatría">Pediatría</option>
+                    </select>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary" style="width:100%;">
+                    <i data-lucide="user-plus" style="width:15px; height:15px;"></i>
+                    <span>Ingresar Paciente a Cola</span>
+                  </button>
+                </form>
+              </div>
+
+              <!-- Chatbot de Pre-admisión -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="message-square" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Asistente Conversacional de Pre-admisión</span>
+                  </div>
+                </div>
+                <div id="chatPreadmisionFeed" style="height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:12px; font-size:0.825rem;">
+                  <div style="align-self:flex-start; background:var(--primary-subtle); color:var(--primary); padding:8px 12px; border-radius:8px; max-width:85%;">
+                    <strong>Asistente Clínico:</strong> Indique brevemente sus síntomas principales para clasificar su orden de atención.
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="inputChatPreadmision" class="form-control" placeholder="Describa el malestar...">
+                  <button id="btnEnviarPreadmision" class="btn btn-primary btn-sm">Enviar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ============================================================
+             VISTA 2: CONSULTA AMBIENTAL & NOTA SOAP
+             ============================================================ -->
+        <section id="view_consulta" class="view-panel">
+          <div class="grid-60-40">
+            <!-- Audio y Diálogo -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="mic" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Transcripción Ambiental en Tiempo Real (Speech-to-Text)</span>
+                  </div>
+                  <span id="audioTimerClock" style="font-family:var(--font-mono); font-size:1.05rem; font-weight:700; color:var(--primary);">00:00</span>
+                </div>
+
+                <div class="audio-wave-box" id="audioWaveContainer">
+                  <div class="audio-bars">
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                    <div class="audio-bar"></div><div class="audio-bar"></div><div class="audio-bar"></div>
+                  </div>
+                  <button id="btnIniciarGrabacionIA" class="btn btn-primary">
+                    <i data-lucide="mic" style="width:14px; height:14px;"></i>
+                    <span>Iniciar Escucha Ambiental</span>
+                  </button>
+                </div>
+
+                <div id="recordingStatusText" style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">
+                  Inicie la captura para procesar el diálogo médico-paciente y estructurar la nota SOAP.
+                </div>
+
+                <div class="transcript-feed" id="transcriptFeedBox">
+                  <div style="color:var(--text-muted); text-align:center; padding:35px 0; font-size:0.825rem;">
+                    El diálogo estructurado por Whisper/NLP se desplegará aquí en tiempo real.
+                  </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                  <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">
+                    Entidades Clínicas Detectadas (NLP):
+                  </div>
+                  <div id="entidadesClinicasTags" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nota SOAP -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="card-title">
+                      <i data-lucide="file-check" style="width:18px; height:18px; color:var(--primary);"></i>
+                      <span>Nota SOAP Estructurada</span>
+                    </div>
+                    <span id="soapEstadoBadge" class="triage-badge t3">Borrador Pendiente de Firma</span>
+                  </div>
+                  <button id="btnGenerarSOAPManual" class="btn btn-secondary btn-sm" title="Regenerar con LLM">
+                    <i data-lucide="refresh-cw" style="width:13px; height:13px;"></i>
+                  </button>
+                </div>
+
+                <div class="soap-box">
+                  <div class="soap-section">
+                    <div class="soap-header">S — Subjetivo (Anamnesis y Motivo)</div>
+                    <div class="soap-content" id="soapSubjetivo">
+                      Inicie la escucha ambiental para generar el resumen automatizado.
+                    </div>
+                  </div>
+
+                  <div class="soap-section">
+                    <div class="soap-header">O — Objetivo (Exploración y Vitales)</div>
+                    <div class="soap-content" id="soapObjetivo">
+                      Signos vitales de triaje y examen físico sistematizado.
+                    </div>
+                  </div>
+
+                  <div class="soap-section">
+                    <div class="soap-header">A — Análisis (Diagnóstico Diferencial)</div>
+                    <div class="soap-content" id="soapAnalisis">
+                      Correlación de síntomas con base de conocimiento clínico.
+                    </div>
+                  </div>
+
+                  <div class="soap-section">
+                    <div class="soap-header">P — Plan Terapéutico y Derivación</div>
+                    <div class="soap-content" id="soapPlan">
+                      Plan farmacológico y estudios complementarios propuestos.
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border-color); display:flex; gap:10px; flex-wrap:wrap;">
+                  <button id="btnAprobarSOAP" class="btn btn-success" style="flex:1;">
+                    <i data-lucide="check" style="width:15px; height:15px;"></i>
+                    <span>Aprobar y Firmar</span>
+                  </button>
+                  <button id="btnEditarSOAP" class="btn btn-secondary">
+                    <i data-lucide="edit-3" style="width:14px; height:14px;"></i>
+                    <span>Editar</span>
+                  </button>
+                  <button id="btnRechazarSOAP" class="btn btn-danger">
+                    <i data-lucide="x" style="width:14px; height:14px;"></i>
+                    <span>Rechazar</span>
+                  </button>
+                </div>
+
+                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px; text-align:center;">
+                  Principio RF05 / RF12: Ningún registro clínico se consolida sin validación médica profesional.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ============================================================
+             VISTA 3: ESPECIALIDADES DE IA
+             ============================================================ -->
+        <section id="view_especialidades" class="view-panel">
+          
+          <div style="display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:10px; overflow-x:auto;">
+            <button class="btn btn-secondary sub-tab-btn active" data-spec="cardiologia">
+              <i data-lucide="activity" style="width:14px; height:14px;"></i>
+              <span>Cardiología (ECG)</span>
+            </button>
+            <button class="btn btn-secondary sub-tab-btn" data-spec="dermatologia">
+              <i data-lucide="scan" style="width:14px; height:14px;"></i>
+              <span>Dermatología (ABCD)</span>
+            </button>
+            <button class="btn btn-secondary sub-tab-btn" data-spec="radiologia">
+              <i data-lucide="layers" style="width:14px; height:14px;"></i>
+              <span>Radiología (Rayos X)</span>
+            </button>
+            <button class="btn btn-secondary sub-tab-btn" data-spec="pediatria">
+              <i data-lucide="scale" style="width:14px; height:14px;"></i>
+              <span>Pediatría (Dosis)</span>
+            </button>
+          </div>
+
+          <!-- CARDIOLOGÍA -->
+          <div id="specPanel_cardiologia" class="spec-container">
+            <div class="grid-60-40">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="activity" style="width:18px; height:18px; color:var(--accent-rose);"></i>
+                    <span>Telemetría Electrocardiográfica de 12 Derivaciones</span>
+                  </div>
+                  <span id="cardioRitmoBadge" class="triage-badge t1">SCACEST</span>
+                </div>
+
+                <div class="ecg-container">
+                  <div class="ecg-grid"></div>
+                  <canvas id="ecgCanvas"></canvas>
+                  <div class="ecg-telemetry">
+                    <span>DERIVACIÓN: V2</span>
+                    <span>VEL: 25 mm/s</span>
+                    <span id="ecgTelemetryFC">108 BPM</span>
+                    <span>CAL: 10 mm/mV</span>
+                  </div>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                  <button class="btn btn-sm btn-ecg-preset active btn-primary" data-type="infartoST">
+                    Infarto Agudo (SCACEST)
+                  </button>
+                  <button class="btn btn-sm btn-ecg-preset" data-type="fibrilacion">
+                    Fibrilación Auricular (RVR)
+                  </button>
+                  <button class="btn btn-sm btn-ecg-preset" data-type="normal">
+                    Ritmo Sinusal Estable
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="cpu" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>MedIA-Cardio Intelligence v3.4</span>
+                  </div>
+                </div>
+
+                <div id="cardioHallazgosTexto" style="font-size:0.85rem; line-height:1.6; margin-bottom:12px;"></div>
+                <div id="cardioRiesgoScore" style="background:var(--accent-amber-bg); color:var(--accent-amber); padding:10px 14px; border-radius:8px; font-size:0.825rem; margin-bottom:16px;"></div>
+
+                <button class="btn btn-danger" style="width:100%;" onclick="window.medApp.mostrarNotificacion('Protocolo Código Infarto Activado: Notificación enviada a Hemodinamia.', 'danger')">
+                  <i data-lucide="alert-octagon" style="width:15px; height:15px;"></i>
+                  <span>Activar Protocolo Código Infarto</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DERMATOLOGÍA -->
+          <div id="specPanel_dermatologia" class="spec-container" style="display:none;">
+            <div class="grid-60-40">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="maximize" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Dermatoscopía Digital de Alta Resolución</span>
+                  </div>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn btn-sm btn-derma-case active" data-case="DERMA-01">Lesión Atípica</button>
+                    <button class="btn btn-sm btn-derma-case" data-case="DERMA-02">Lesión Benigna</button>
+                  </div>
+                </div>
+
+                <div class="image-viewer-container">
+                  <canvas id="dermaCanvas" class="canvas-viewer"></canvas>
+                </div>
+
+                <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:var(--text-muted);">Calibración óptica: 10x Polarized</span>
+                  <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                    <i data-lucide="upload" style="width:13px; height:13px;"></i>
+                    <span>Subir Captura Clínica</span>
+                    <input type="file" id="inputSubirImagenDerma" accept="image/*" style="display:none;">
+                  </label>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="bar-chart-2" style="width:18px; height:18px; color:var(--secondary);"></i>
+                    <span>Análisis Criterios ABCD & Probabilidad</span>
+                  </div>
+                </div>
+
+                <table class="clinical-table" style="margin-bottom:16px;">
+                  <tbody>
+                    <tr><td><strong>A - Asimetría:</strong></td><td id="dermaAsimetria">-</td></tr>
+                    <tr><td><strong>B - Bordes:</strong></td><td id="dermaBordes">-</td></tr>
+                    <tr><td><strong>C - Color:</strong></td><td id="dermaColor">-</td></tr>
+                    <tr><td><strong>D - Diámetro:</strong></td><td id="dermaDiametro">-</td></tr>
+                  </tbody>
+                </table>
+
+                <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">
+                  Distribución Probabilística (MedIA-Derma):
+                </div>
+                <div id="dermaProbabilidades"></div>
+                <div id="dermaRecomendacion" style="margin-top:14px; background:var(--primary-subtle); color:var(--primary); padding:10px 12px; border-radius:8px; font-size:0.825rem;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RADIOLOGÍA -->
+          <div id="specPanel_radiologia" class="spec-container" style="display:none;">
+            <div class="grid-60-40">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="scan-line" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Visor Radiográfico PA de Tórax</span>
+                  </div>
+                  <button id="btnToggleRadOverlays" class="btn btn-secondary btn-sm">
+                    <i data-lucide="eye" style="width:13px; height:13px;"></i>
+                    <span>Alternar Marcado IA</span>
+                  </button>
+                </div>
+
+                <div class="image-viewer-container">
+                  <canvas id="radCanvas" class="canvas-viewer"></canvas>
+                </div>
+
+                <div style="margin-top:12px; display:flex; gap:12px;">
+                  <span class="patient-pill">Proyección: PA Erecto</span>
+                  <span class="patient-pill">Matriz DICOM: 1024 x 1024</span>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="cpu" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Hallazgos MedIA-DenseNet</span>
+                  </div>
+                  <span id="radPrioridadBadge" class="triage-badge t1">Prioridad Alta</span>
+                </div>
+
+                <div id="radHallazgosLista" style="margin-bottom:14px;"></div>
+
+                <div style="font-size:0.825rem; line-height:1.5; margin-bottom:14px;">
+                  <strong>Conclusión Preliminar Asistida:</strong><br>
+                  <span id="radConclusionTexto">Cargando...</span>
+                </div>
+
+                <button class="btn btn-primary" style="width:100%;" onclick="window.medApp.mostrarNotificacion('Hallazgos radiológicos consolidados en la HCE.', 'success')">
+                  <i data-lucide="file-plus" style="width:14px; height:14px;"></i>
+                  <span>Incorporar al Expediente Clínico</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PEDIATRÍA -->
+          <div id="specPanel_pediatria" class="spec-container" style="display:none;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i data-lucide="scale" style="width:18px; height:18px; color:var(--primary);"></i>
+                  <span>Calculador de Dosificación Pediátrica Segura por Peso</span>
+                </div>
+                <span class="patient-pill">Protocolo Antidosis Letal</span>
+              </div>
+
+              <div style="max-width:480px; margin-bottom:20px;">
+                <label class="form-label" style="display:flex; justify-content:space-between;">
+                  <span>Peso Corporal del Paciente:</span>
+                  <strong id="displayPesoPediatrico" style="font-family:var(--font-mono); color:var(--primary);">21.0 kg</strong>
+                </label>
+                <input type="range" id="sliderPesoPediatrico" min="3" max="50" step="0.5" value="21" style="width:100%; accent-color:var(--primary);">
+                <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+                  <span>Lactante (3 kg)</span>
+                  <span>Escolar (21 kg)</span>
+                  <span>Pediátrico Mayor (50 kg)</span>
+                </div>
+              </div>
+
+              <div id="pediatriaCalculosCards" class="grid-3"></div>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ============================================================
+             VISTA 4: HISTORIA CLÍNICA ELECTRÓNICA
+             ============================================================ -->
+        <section id="view_hce" class="view-panel">
+          <div class="card" id="hcePacienteHeader"></div>
+          <div id="hceAlergiasBox" style="margin-bottom:20px;"></div>
+
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="clipboard-list" style="width:18px; height:18px; color:var(--primary);"></i>
+                    <span>Antecedentes Patológicos & Comorbilidades</span>
+                  </div>
+                </div>
+                <ul id="hceAntecedentesLista" style="list-style:none;"></ul>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="pill" style="width:18px; height:18px; color:var(--secondary);"></i>
+                    <span>Medicación Habitual Activa</span>
+                  </div>
+                </div>
+                <div id="hceMedicacionLista"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <i data-lucide="history" style="width:18px; height:18px; color:var(--accent-indigo);"></i>
+                    <span>Línea Cronológica de Atenciones</span>
+                  </div>
+                </div>
+                <div id="hceTimelineAtenciones"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ============================================================
+             VISTA 5: FARMACIA & LABORATORIO
+             ============================================================ -->
+        <section id="view_farmacia_lab" class="view-panel">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i data-lucide="shield-alert" style="width:18px; height:18px; color:var(--accent-rose);"></i>
+                  <span>Prescripción Asistida & Verificación de Alergias</span>
+                </div>
+                <span class="patient-pill">Motor Antialergia RF08</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Seleccionar Fármaco</label>
+                <select id="farmaciaCatalogoSelect" class="form-control"></select>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;" class="form-group">
+                <div>
+                  <label class="form-label">Posología</label>
+                  <input type="text" id="inputDosisPrescripcion" class="form-control" value="1 comprimido cada 8 horas">
+                </div>
+                <div>
+                  <label class="form-label">Vía</label>
+                  <select id="selectViaPrescripcion" class="form-control">
+                    <option value="Oral">Oral</option>
+                    <option value="Intravenosa">Intravenosa (EV)</option>
+                    <option value="Sublingual">Sublingual</option>
+                    <option value="Inhalatoria">Inhalatoria</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="btnAgregarPrescripcion" class="btn btn-primary" style="width:100%; margin-bottom:16px;">
+                <i data-lucide="plus" style="width:15px; height:15px;"></i>
+                <span>Agregar a Orden Médica</span>
+              </button>
+
+              <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">
+                Orden Médica en Proceso:
+              </div>
+              <div id="recetaActivaItems"></div>
+
+              <button id="btnEmitirRecetaFinal" class="btn btn-success" style="width:100%; margin-top:12px;">
+                <i data-lucide="send" style="width:15px; height:15px;"></i>
+                <span>Firmar Digitalmente y Transmitir a Farmacia</span>
+              </button>
+            </div>
+
+            <div>
+              <div id="laboratorioResultadosContainer"></div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ============================================================
+             VISTA 6: AUDITORÍA DE IA
+             ============================================================ -->
+        <section id="view_auditoria" class="view-panel">
+          <div id="hospitalKpisBox" style="margin-bottom:20px;"></div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="file-spreadsheet" style="width:18px; height:18px; color:var(--primary);"></i>
+                <span>Registro Inmutable de Auditoría Algorítmica (RF11 y RF12)</span>
+              </div>
+              <span style="font-size:0.72rem; color:var(--text-muted);">Trazabilidad de cada inferencia y decisión humana</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="clinical-table">
+                <thead>
+                  <tr>
+                    <th>Marca Temporal</th>
+                    <th>Módulo IA</th>
+                    <th>Profesional</th>
+                    <th>Paciente</th>
+                    <th>Inferencia de IA</th>
+                    <th>Validación Humana</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="auditoriaTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL DE ALERTA DE SEGURIDAD FARMACOLÓGICA -->
+  <div class="modal-overlay" id="modalAlertaFarmacologica">
+    <div class="modal-box" style="border:2px solid var(--accent-rose);">
+      <div class="modal-header" style="background:var(--accent-rose-bg);">
+        <strong style="color:var(--accent-rose); font-size:1rem; display:flex; align-items:center; gap:8px;">
+          <i data-lucide="alert-triangle" style="width:18px; height:18px;"></i>
+          <span>BLOQUEO DE SEGURIDAD: HIPERSENSIBILIDAD DETECTADA (RF08)</span>
+        </strong>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom:12px; font-size:0.875rem;">
+          Intento de prescripción: <strong id="modalFarmacoNombre" style="color:var(--accent-rose);">-</strong>
+        </p>
+        <div style="background:var(--accent-rose-bg); color:var(--accent-rose); padding:10px 14px; border-radius:8px; font-size:0.8rem; margin-bottom:14px; font-weight:700;">
+          Alergia Crítica Registrada: <span id="modalPacienteAlergia">-</span>
+        </div>
+        <div id="modalDetalleRiesgo" style="font-size:0.825rem; line-height:1.6; color:var(--text-main);"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelarPrescripcionRiesgosa" class="btn btn-secondary">
+          Cancelar y Sustituir Fármaco (Seguro)
+        </button>
+        <button id="btnForzarPrescripcionRiesgosa" class="btn btn-danger btn-sm">
+          Sobrescribir bajo Responsabilidad Profesional
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/bundle.js"></script>
+</body>
+</html>
