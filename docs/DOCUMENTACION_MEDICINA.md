@@ -403,64 +403,66 @@ El diseño arquitectónico de MedIA360 se estructura en un modelo cliente-servid
 
 ```mermaid
 flowchart TD
-    subgraph Backbone ["Centro de Cómputo / Servidor Central Hospitalario"]
-        subgraph ServidorLocal ["Servidor de Aplicaciones y Computación de IA"]
-            CoreServer["Servidor Web y API Gateway (IP: 192.168.99.10)"]
-            EngineGPU["Motor Inferencia GPU TensorRT (IP: 192.168.99.11)"]
-            DBServer["Base de Datos Clínica PostgreSQL / DICOM PACS (IP: 192.168.99.12)"]
+    subgraph Backbone ["Centro de Cómputo / Servidor Central Hospitalario (VLAN 99)"]
+        CoreRouter["Router / Firewall Central\nGateway: 192.168.99.1"]
+        subgraph ServidoresCluster ["Cluster de Servidores"]
+            CoreServer["Servidor Web & API Gateway\nIP: 192.168.99.10"]
+            EngineGPU["Motor Inferencia GPU TensorRT\nIP: 192.168.99.11"]
+            DBServer["Base de Datos PostgreSQL / PACS\nIP: 192.168.99.12"]
         end
-        CoreRouter["Router / Firewall Administrable Central (Gateway: 192.168.99.1)"]
-        CoreRouter <--> ServidorLocal
+        CoreRouter <--> ServidoresCluster
     end
 
-    subgraph InfraRed ["Topología de Red Hospitalaria Segmentada"]
-        SW_Sala1["Switch Administrable 24P - Sala 1 (Triaje y Admisión)\nVLAN 10: 192.168.10.254"]
-        SW_Sala2["Switch Administrable 24P - Sala 2 (Consultorios y Especialidades)\nVLAN 20: 192.168.20.254"]
-        SW_Sala3["Switch Administrable 24P - Sala 3 (Imagenología, Lab y Farmacia)\nVLAN 30: 192.168.30.254"]
-        SW_Admin["Switch Administrable 24P - Zona Admin y Auditoría\nVLAN 40: 192.168.40.254"]
+    subgraph BloqueAsistencial ["Bloque Asistencial y Consulta"]
+        subgraph Sala1 ["Sala 1: Triaje y Admisión (VLAN 10)"]
+            SW_Sala1["Switch Administrable 24P\n192.168.10.254"]
+            WS_Triaje1["Terminal Enfermería 1\nIP: 192.168.10.11"]
+            WS_Triaje2["Terminal Enfermería 2\nIP: 192.168.10.12"]
+            Biomed_Signos["Monitor Signos IoT\nIP: 192.168.10.50"]
+            SW_Sala1 --- WS_Triaje1
+            SW_Sala1 --- WS_Triaje2
+            SW_Sala1 --- Biomed_Signos
+        end
+
+        subgraph Sala2 ["Sala 2: Consultorios y Especialidades (VLAN 20)"]
+            SW_Sala2["Switch Administrable 24P\n192.168.20.254"]
+            WS_MedGen["Terminal Médico SOAP\nIP: 192.168.20.11"]
+            WS_Derma["Estación Dermoscopia\nIP: 192.168.20.21"]
+            WS_Cardio["Estación ECG\nIP: 192.168.20.31"]
+            SW_Sala2 --- WS_MedGen
+            SW_Sala2 --- WS_Derma
+            SW_Sala2 --- WS_Cardio
+        end
     end
 
-    CoreRouter ===|Enlace Troncal Fibra 10G| SW_Sala1
-    CoreRouter ===|Enlace Troncal Fibra 10G| SW_Sala2
-    CoreRouter ===|Enlace Troncal Fibra 10G| SW_Sala3
-    CoreRouter ===|Enlace Troncal Fibra 10G| SW_Admin
+    subgraph BloqueDiagnostico ["Bloque Diagnóstico, Farmacia y Gestión"]
+        subgraph Sala3 ["Sala 3: Imagenología y Farmacia (VLAN 30)"]
+            SW_Sala3["Switch Administrable 24P\n192.168.30.254"]
+            WS_Radiologia["Estación Radiología Grad-CAM\nIP: 192.168.30.11"]
+            WS_Farmacia["Terminal Farmacia\nIP: 192.168.30.21"]
+            RayosX_Equipo["Rayos X Digital DICOM\nIP: 192.168.30.55"]
+            SW_Sala3 --- WS_Radiologia
+            SW_Sala3 --- WS_Farmacia
+            SW_Sala3 --- RayosX_Equipo
+        end
 
-    subgraph DispositivosSala1 ["Sala 1: Admisión y Triaje (VLAN 10)"]
-        WS_Triaje1["Terminal Enfermería 1\nIP: 192.168.10.11"]
-        WS_Triaje2["Terminal Enfermería 2\nIP: 192.168.10.12"]
-        Biomed_Signos["Monitor de Signos Vitales IoT\nIP: 192.168.10.50"]
-        WS_Triaje1 --- SW_Sala1
-        WS_Triaje2 --- SW_Sala1
-        Biomed_Signos --- SW_Sala1
+        subgraph SalaAdmin ["Zona Administrativa y Auditoría (VLAN 40)"]
+            SW_Admin["Switch Administrable 24P\n192.168.40.254"]
+            WS_Auditoria["Terminal Auditoría Médica\nIP: 192.168.40.11"]
+            SW_Admin --- WS_Auditoria
+        end
     end
 
-    subgraph DispositivosSala2 ["Sala 2: Consultorios y Especialidades (VLAN 20)"]
-        WS_MedGen["Terminal Médico General (SOAP)\nIP: 192.168.20.11"]
-        WS_Derma["Estación Dermatoscopia (ABCD)\nIP: 192.168.20.21"]
-        WS_Cardio["Estación Electrocardiografía\nIP: 192.168.20.31"]
-        WS_MedGen --- SW_Sala2
-        WS_Derma --- SW_Sala2
-        WS_Cardio --- SW_Sala2
-    end
-
-    subgraph DispositivosSala3 ["Sala 3: Imagenología y Farmacia (VLAN 30)"]
-        WS_Radiologia["Estación Diagnóstico Radiología (Grad-CAM)\nIP: 192.168.30.11"]
-        WS_Farmacia["Terminal Dispensación Farmacia\nIP: 192.168.30.21"]
-        RayosX_Equipo["Modalidad Rayos X Digital (DICOM)\nIP: 192.168.30.55"]
-        WS_Radiologia --- SW_Sala3
-        WS_Farmacia --- SW_Sala3
-        RayosX_Equipo --- SW_Sala3
-    end
-
-    subgraph DispositivosAdmin ["Zona Administrativa (VLAN 40)"]
-        WS_Auditoria["Terminal Auditoría y Dirección Médica\nIP: 192.168.40.11"]
-        WS_Auditoria --- SW_Admin
-    end
+    CoreRouter ===|Troncal Fibra 10G| SW_Sala1
+    CoreRouter ===|Troncal Fibra 10G| SW_Sala2
+    BloqueAsistencial -.->|Canalizacion de Red Distribucion| BloqueDiagnostico
+    CoreRouter ===|Troncal Fibra 10G| SW_Sala3
+    CoreRouter ===|Troncal Fibra 10G| SW_Admin
 
     classDef srvStyle fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
     classDef swStyle fill:#0f766e,stroke:#2dd4bf,stroke-width:2px,color:#ffffff;
     classDef devStyle fill:#ffffff,stroke:#64748b,stroke-width:1px,color:#0f172a;
-    class ServidorLocal,CoreRouter,CoreServer,EngineGPU,DBServer srvStyle;
+    class Backbone,ServidoresCluster,CoreRouter,CoreServer,EngineGPU,DBServer srvStyle;
     class SW_Sala1,SW_Sala2,SW_Sala3,SW_Admin swStyle;
     class WS_Triaje1,WS_Triaje2,Biomed_Signos,WS_MedGen,WS_Derma,WS_Cardio,WS_Radiologia,WS_Farmacia,RayosX_Equipo,WS_Auditoria devStyle;
 ```
